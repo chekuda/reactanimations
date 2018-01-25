@@ -99,6 +99,8 @@ export default class Carousel extends Component {
           <div className='buttons-section'>
             <button className='move' type='button' onClick={() => this.moveSlideX('left')}>left</button>
             <button className='move' type='button' onClick={() => this.moveSlideX('right')}>right</button>
+            <button className='move' type='button' onClick={() => this.moveSlideX('up')}>Up</button>
+            <button className='move' type='button' onClick={() => this.moveSlideX('down')}>Down</button>
           </div>
         </header>
         <div className='slider-wrapper'>
