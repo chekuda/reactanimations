@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Hammer from 'react-hammerjs'
 import './Carousel.css';
 
 export default class Carousel extends Component {
@@ -41,6 +42,8 @@ export default class Carousel extends Component {
   }
 
   moveSlideX(direction){
+    if(!direction) return
+
     let numberDirection = 1
     const { rotateX, rotateY, rotateZ } = this.state.rotateStatus
 
@@ -57,7 +60,7 @@ export default class Carousel extends Component {
     })
   }
 
-  getRotateStyle(){
+  getRotateDeg(){
   const { rotateStatus, direction } = this.state
   const { rotateX, rotateY, rotateZ } = rotateStatus
 
@@ -70,14 +73,13 @@ export default class Carousel extends Component {
   const degresToMove = activeX ? rotateX : rotateY
 
   return `rotate3d(${activeX}, ${activeY}, ${activeZ}, ${degresToMove}deg)`
-
   }
 
   renderSlides(){
     const { assets } = this.state
 
     return (
-      <div className='slider' style={{ transform: this.getRotateStyle() }}>
+      <div className='slider' style={{ transform: this.getRotateDeg() }}>
         {
           assets.map((ele, index) => {
             return (
@@ -91,6 +93,15 @@ export default class Carousel extends Component {
       </div>
     )
   }
+
+  handleSwipe = ({ offsetDirection, isFinal }) => {
+    const direction = {
+      2: 'left',
+      4: 'right'
+    }
+    this.moveSlideX(direction[offsetDirection])
+  }
+
   render() {
     return (
       <div className="Carousel">
@@ -103,10 +114,12 @@ export default class Carousel extends Component {
             <button className='move' type='button' onClick={() => this.moveSlideX('down')}>Down</button>
           </div>
         </header>
-        <div className='slider-wrapper'>
-          { this.state.assets.length && this.renderSlides() }
-        </div>
+          <div className='slider-wrapper'>
+            <Hammer onSwipe={this.handleSwipe}>
+              { this.state.assets.length && this.renderSlides() }
+            </Hammer>
+          </div>
       </div>
-    );
+    )
   }
 }
