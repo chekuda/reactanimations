@@ -5,20 +5,31 @@ import './Carousel.css';
 export default class Carousel extends Component {
   constructor(){
     super()
-    this.assets = [ 1, 2, 3, 4, 5, 6, 7 ]
     this.moveDeg = 90
     this.state = {
-      assets: [],
+      assets: [{ src: 'first' }, { src: 'second' }, { src: 'third' }, { src: 'four' }], //, { src: 'fitht' }, { src: 'six' }, { src: 'seven' }],
       rotateStatus: {
         rotateX: 0,
         rotateY: 0,
         rotateZ: 0
-      }
+      },
+      currentSlide: 0,
+      virtualSlidesArray: []
     }
   }
 
   componentWillMount(){
-    this.setState({ assets: this.assets.filter((asset, index) => index < 4) })
+    this.setState({ virtualSlidesArray: this.getVirtualSlides() })
+  }
+  componentDidMount(){
+   this.slider.addEventListener('transitionend', () => {
+      const { dirNumber } = this.state
+      const virtualSlidesArray = this.getVirtualSlides(dirNumber)
+      this.setState({
+        currentSlide: virtualSlidesArray[1],
+        virtualSlidesArray
+      })
+    })
   }
 
   addCubeClasses(index){
@@ -41,20 +52,49 @@ export default class Carousel extends Component {
     }
   }
 
+  getVirtualSlides(direction){
+    let virtualSlidesArray = [], next, previous
+    const { currentSlide, assets } = this.state
+    //left -1 right 1
+    if(direction === -1){
+      if(currentSlide === assets.length - 1){
+        next = assets[1] ? 1 : assets.length - 1
+        virtualSlidesArray = [currentSlide, 0 , next]
+      } else {
+        next = assets[currentSlide + 2] ? currentSlide + 2 : 0
+        virtualSlidesArray = [currentSlide, currentSlide + 1, next]
+      }
+    } else if( direction === 1){
+      if(currentSlide === 0){
+        previous = assets[assets.length - 2] ? assets.length - 2 : assets.length - 1
+        virtualSlidesArray = [previous, assets.length - 1, currentSlide]
+      } else {
+        previous = (currentSlide -2) < 0 ? assets.length - 1 : currentSlide
+        virtualSlidesArray = [previous, currentSlide - 1, currentSlide]
+      }
+    } else {
+      next = assets[1] ? 1 : assets.length - 1
+      virtualSlidesArray = [assets.length - 1, currentSlide, next]
+    }
+
+    return virtualSlidesArray
+  }
+
   moveSlideX(direction){
     if(!direction) return
 
-    let numberDirection = 1
     const { rotateX, rotateY, rotateZ } = this.state.rotateStatus
 
     const activeDirection = (direction === 'left' || direction === 'right') ? 'y' : 'x'
-    const multiplyDeg = (direction === 'left' || direction === 'down') ? -1 : 1
+    const dirNumber = (direction === 'left' || direction === 'down') ? -1 : 1
+    console.log(dirNumber)
 
     this.setState({
+      dirNumber,
       direction: direction,
       rotateStatus: {
-        rotateX: rotateX + (activeDirection === 'x' ? multiplyDeg * this.moveDeg : 0) ,
-        rotateY: rotateY + (activeDirection === 'y' ? multiplyDeg * this.moveDeg : 0),
+        rotateX: rotateX + (activeDirection === 'x' ? dirNumber * this.moveDeg : 0),
+        rotateY: rotateY + (activeDirection === 'y' ? dirNumber * this.moveDeg : 0),
         rotateZ: 0
       }
     })
@@ -76,19 +116,21 @@ export default class Carousel extends Component {
   }
 
   renderSlides(){
-    const { assets } = this.state
+    const { assets, virtualSlidesArray } = this.state
+    console.log(virtualSlidesArray)
 
     return (
-      <div className='slider' style={{ transform: this.getRotateDeg() }}>
+      <div className='slider' style={{ transform: this.getRotateDeg()}} ref={slider => this.slider = slider}>
         {
-          assets.map((ele, index) => {
-            return (
-              <div
-              key={index}
-              className={`slide ${this.addCubeClasses(index)}`}>
-              { index }
-              </div>)
-          })
+        virtualSlidesArray.map((virtualAssetNumber, index) =>{
+          return (
+            <div
+            key={index}
+            className={`slide ${this.addCubeClasses(index)}`}>
+            { assets.find(({ src }, i) => virtualAssetNumber === i).src }
+            </div>
+          )
+        })
         }
       </div>
     )
@@ -114,11 +156,11 @@ export default class Carousel extends Component {
             <button className='move' type='button' onClick={() => this.moveSlideX('down')}>Down</button>
           </div>
         </header>
-          <div className='slider-wrapper'>
             <Hammer onSwipe={this.handleSwipe}>
+            <div className='slider-wrapper' ref={jose => this.jose = jose}>
               { this.state.assets.length && this.renderSlides() }
+            </div>
             </Hammer>
-          </div>
       </div>
     )
   }
