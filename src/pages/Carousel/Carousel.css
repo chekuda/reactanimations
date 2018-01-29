@@ -47,7 +47,7 @@
   width: 500px;
   transform-style: preserve-3d;
   transform-origin: 250px 250px -250px;
-  transition-duration: 1s;
+  transition-duration: .7s;
   transition-timing-function: ease-in-out;
 }
 .slide {
@@ -58,22 +58,22 @@
   text-align: center;
 }
 
-.firstSlide{
-  background: blue;
-  transform: rotateY(90deg) translate3d(250px,0, 250px);
-}
-
-.secondSlide {
+.firstSlide {
   background: red;
   transform: rotateY(0deg) translate3d(0,0,0);
 }
 
-.thirdSlide {
+.secondSlide {
   background: green;
-  transform: rotateY(-90deg) translate3d(-250px,0, 250px);
+  transform: rotateY(90deg) translate3d(250px,0, 250px);
 }
 
 .fourSlide{
+  background: blue;
+  transform: rotateY(-90deg) translate3d(-250px,0, 250px);
+}
+
+.thirdSlide{
   background: yellow;
   transform: rotateY(-180deg) translate3d(0,0,500px);
 }

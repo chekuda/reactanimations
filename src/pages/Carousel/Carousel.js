@@ -7,13 +7,13 @@ export default class Carousel extends Component {
     super()
     this.moveDeg = 90
     this.state = {
-      assets: [{ src: 'first' }, { src: 'second' }, { src: 'third' }, { src: 'four' }], //, { src: 'fitht' }, { src: 'six' }, { src: 'seven' }],
+      assets: [{ src: 'asset0' }, { src: 'asset1' }, { src: 'asset2' }, { src: 'asset3' }, { src: 'asset4' }, { src: 'asset5' }, { src: 'assset6' }],
       rotateStatus: {
         rotateX: 0,
         rotateY: 0,
         rotateZ: 0
       },
-      currentSlide: 0,
+      current: 0,
       virtualSlidesArray: []
     }
   }
@@ -25,8 +25,8 @@ export default class Carousel extends Component {
    this.slider.addEventListener('transitionend', () => {
       const { dirNumber } = this.state
       const virtualSlidesArray = this.getVirtualSlides(dirNumber)
+      console.log(virtualSlidesArray)
       this.setState({
-        currentSlide: virtualSlidesArray[1],
         virtualSlidesArray
       })
     })
@@ -53,31 +53,57 @@ export default class Carousel extends Component {
   }
 
   getVirtualSlides(direction){
-    let virtualSlidesArray = [], next, previous
-    const { currentSlide, assets } = this.state
-    //left -1 right 1
-    if(direction === -1){
-      if(currentSlide === assets.length - 1){
-        next = assets[1] ? 1 : assets.length - 1
-        virtualSlidesArray = [currentSlide, 0 , next]
-      } else {
-        next = assets[currentSlide + 2] ? currentSlide + 2 : 0
-        virtualSlidesArray = [currentSlide, currentSlide + 1, next]
-      }
-    } else if( direction === 1){
-      if(currentSlide === 0){
-        previous = assets[assets.length - 2] ? assets.length - 2 : assets.length - 1
-        virtualSlidesArray = [previous, assets.length - 1, currentSlide]
-      } else {
-        previous = (currentSlide -2) < 0 ? assets.length - 1 : currentSlide
-        virtualSlidesArray = [previous, currentSlide - 1, currentSlide]
-      }
-    } else {
-      next = assets[1] ? 1 : assets.length - 1
-      virtualSlidesArray = [assets.length - 1, currentSlide, next]
+    const { assets, virtualSlidesArray } = this.state
+    let { current } = this.state
+
+    if(virtualSlidesArray.length === 0) {
+      return Array.from(Array(4), (ele, index) => {
+        if(assets[current] && index !== 3){
+          return current++
+        }
+        return assets.length -1
+      })
     }
 
-    return virtualSlidesArray
+    return virtualSlidesArray.map((ele, i) => {
+      const visibledSlide = virtualSlidesArray[current]
+      if(i === current) {
+        //console.log('equal')
+        return ele
+      }
+      if((current - 1 >= 0) && (i === current - 1)){
+        //console.log('rest and more than 0')
+        return visibledSlide - 1 >= 0 ? visibledSlide - 1 : assets.length -1
+      }
+      if((current + 1 <= virtualSlidesArray.length -1) && (i === current +1)){
+        //console.log('sum and less than length 0')
+        return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
+      }
+      if(current -1 < 0 && i === virtualSlidesArray.length -1){
+        //console.log('rest and less than 0 equal to length')
+        return visibledSlide -1 >= 0 ? visibledSlide - 1 : assets.length -1
+      }
+      if(current + 1 > virtualSlidesArray.length - 1 && i === 0){
+       // console.log('sum and more than legnth')
+        return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
+      }
+      if(i !== current -1 || i !== current +1) {
+        //console.log('nothing')
+        return ele
+      }
+  })
+}
+
+  setCurrent(dirNumber){
+    //Need to rest instead of sum because of the deg are going to -90deg when left direction
+    const { current, virtualSlidesArray } = this.state
+    if((current - dirNumber) < 0) {
+      return virtualSlidesArray.length - 1
+    } else if((current - dirNumber) > (virtualSlidesArray.length -1)) {
+      return 0
+    } else {
+      return current - dirNumber
+    }
   }
 
   moveSlideX(direction){
@@ -87,7 +113,6 @@ export default class Carousel extends Component {
 
     const activeDirection = (direction === 'left' || direction === 'right') ? 'y' : 'x'
     const dirNumber = (direction === 'left' || direction === 'down') ? -1 : 1
-    console.log(dirNumber)
 
     this.setState({
       dirNumber,
@@ -96,7 +121,8 @@ export default class Carousel extends Component {
         rotateX: rotateX + (activeDirection === 'x' ? dirNumber * this.moveDeg : 0),
         rotateY: rotateY + (activeDirection === 'y' ? dirNumber * this.moveDeg : 0),
         rotateZ: 0
-      }
+      },
+      current: this.setCurrent(dirNumber)
     })
   }
 
@@ -117,7 +143,8 @@ export default class Carousel extends Component {
 
   renderSlides(){
     const { assets, virtualSlidesArray } = this.state
-    console.log(virtualSlidesArray)
+    console.log('current', this.state.current)
+    // console.log(virtualSlidesArray)
 
     return (
       <div className='slider' style={{ transform: this.getRotateDeg()}} ref={slider => this.slider = slider}>
