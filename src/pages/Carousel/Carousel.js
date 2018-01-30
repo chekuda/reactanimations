@@ -15,22 +15,15 @@ export default class Carousel extends Component {
         rotateZ: 0
       },
       current: 0,
-      virtualSlidesArray: []
+      virtualIndexArray: []
     }
   }
 
   componentWillMount(){
-    this.setState({ virtualSlidesArray: this.getVirtualSlides() })
+    this.getVirtualSlides()
   }
   componentDidMount(){
-   this.slider.addEventListener('transitionend', () => {
-      const { dirNumber } = this.state
-      const virtualSlidesArray = this.getVirtualSlides(dirNumber)
-      console.log(virtualSlidesArray)
-      this.setState({
-        virtualSlidesArray
-      }, () => (this.canMove = true))
-    })
+   this.slider.addEventListener('transitionend', this.getVirtualSlides, false)
   }
 
   addCubeClasses(index){
@@ -53,54 +46,58 @@ export default class Carousel extends Component {
     }
   }
 
-  getVirtualSlides(direction){
-    const { assets, virtualSlidesArray } = this.state
+  getVirtualSlides = () => {
+    const { assets, virtualIndexArray } = this.state
+    let virtualArray = []
     let { current } = this.state
 
-    if(virtualSlidesArray.length === 0) {
-      return Array.from(Array(4), (ele, index) => {
+    if(!virtualIndexArray.length){
+      virtualArray = Array.from(Array(4), (ele, index) => {
         if(assets[current] && index !== 3){
           return current++
         }
         return assets.length -1
       })
+    } else {
+      virtualArray = virtualIndexArray.map((ele, index) => {
+        const visibledSlide = virtualIndexArray[current]
+        if(index === current) {
+          return ele
+        } else if(index === current - 1) {
+          return visibledSlide - 1 >= 0 ? visibledSlide - 1 : assets.length -1
+        } else if(index === current + 1){
+          return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
+        } else if(index === 0){
+          return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
+        } else if(index === virtualIndexArray.length -1){
+          return visibledSlide -1 >= 0 ? visibledSlide - 1 : assets.length -1
+        } else if(index !== current -1 || index !== current +1){
+          return ele
+        }
+        // else if((current - 1 >= 0) && (index === current - 1)){
+        //   return visibledSlide - 1 >= 0 ? visibledSlide - 1 : assets.length -1
+        // } else if((current + 1 <= virtualIndexArray.length -1) && (index === current +1)){
+        //   return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
+        // } else if(current -1 < 0 && index === virtualIndexArray.length -1){
+        //   return visibledSlide -1 >= 0 ? visibledSlide - 1 : assets.length -1
+        // } else if(current + 1 > virtualIndexArray.length - 1 && index === 0){
+        //   return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
+        // } else if(index !== current -1 || index !== current +1) {
+        //   return ele
+        // }
+      })
     }
 
-    return virtualSlidesArray.map((ele, i) => {
-      const visibledSlide = virtualSlidesArray[current]
-      if(i === current) {
-        //console.log('equal')
-        return ele
-      }
-      if((current - 1 >= 0) && (i === current - 1)){
-        //console.log('rest and more than 0')
-        return visibledSlide - 1 >= 0 ? visibledSlide - 1 : assets.length -1
-      }
-      if((current + 1 <= virtualSlidesArray.length -1) && (i === current +1)){
-        //console.log('sum and less than length 0')
-        return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
-      }
-      if(current -1 < 0 && i === virtualSlidesArray.length -1){
-        //console.log('rest and less than 0 equal to length')
-        return visibledSlide -1 >= 0 ? visibledSlide - 1 : assets.length -1
-      }
-      if(current + 1 > virtualSlidesArray.length - 1 && i === 0){
-       // console.log('sum and more than legnth')
-        return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
-      }
-      if(i !== current -1 || i !== current +1) {
-        //console.log('nothing')
-        return ele
-      }
-  })
+  this.setState({ virtualIndexArray: virtualArray }, () => (this.canMove = true))
+
 }
 
   setCurrent(dirNumber){
     //Need to rest instead of sum because of the deg are going to -90deg when left direction
-    const { current, virtualSlidesArray } = this.state
+    const { current, virtualIndexArray } = this.state
     if((current - dirNumber) < 0) {
-      return virtualSlidesArray.length - 1
-    } else if((current - dirNumber) > (virtualSlidesArray.length -1)) {
+      return virtualIndexArray.length - 1
+    } else if((current - dirNumber) > (virtualIndexArray.length -1)) {
       return 0
     } else {
       return current - dirNumber
@@ -108,19 +105,16 @@ export default class Carousel extends Component {
   }
 
   moveSlideX(direction){
-    if(!direction) return
+    const { rotateY } = this.state.rotateStatus
 
-    const { rotateX, rotateY, rotateZ } = this.state.rotateStatus
-
-    const activeDirection = (direction === 'left' || direction === 'right') ? 'y' : 'x'
-    const dirNumber = (direction === 'left' || direction === 'down') ? -1 : 1
+    const dirNumber = direction === 'left' ? -1 : 1
 
     this.setState({
       dirNumber,
       direction: direction,
       rotateStatus: {
-        rotateX: rotateX + (activeDirection === 'x' ? dirNumber * this.moveDeg : 0),
-        rotateY: rotateY + (activeDirection === 'y' ? dirNumber * this.moveDeg : 0),
+        rotateX: 0,
+        rotateY: rotateY + (dirNumber * this.moveDeg),
         rotateZ: 0
       },
       current: this.setCurrent(dirNumber)
@@ -133,24 +127,20 @@ export default class Carousel extends Component {
 
   if(!direction) return {}
 
-  const activeX = (direction === 'up' || direction === 'down') ? 1 : 0
-  const activeY = (direction === 'left' || direction === 'right') ? 1 : 0
+  const activeX = 0
+  const activeY = 1
   const activeZ = 0
 
-  const degresToMove = activeX ? rotateX : rotateY
-
-  return `rotate3d(${activeX}, ${activeY}, ${activeZ}, ${degresToMove}deg)`
+  return `rotate3d(${activeX}, ${activeY}, ${activeZ}, ${rotateY}deg)`
   }
 
   renderSlides(){
-    const { assets, virtualSlidesArray } = this.state
-    console.log('current', this.state.current)
-    // console.log(virtualSlidesArray)
+    const { assets, virtualIndexArray } = this.state
 
     return (
       <div className='slider' style={{ transform: this.getRotateDeg()}} ref={slider => this.slider = slider}>
         {
-        virtualSlidesArray.map((virtualAssetNumber, index) =>{
+        virtualIndexArray.map((virtualAssetNumber, index) =>{
           return (
             <div
             key={index}
@@ -164,7 +154,7 @@ export default class Carousel extends Component {
     )
   }
 
-  handleSwipe = ({ offsetDirection, isFinal }) => {
+  handleSwipe = ({ offsetDirection }) => {
     if (!this.canMove) {
       return false
     }
@@ -191,7 +181,7 @@ export default class Carousel extends Component {
           </div>
         </header>
             <Hammer onSwipe={this.handleSwipe}>
-            <div className='slider-wrapper' ref={jose => this.jose = jose}>
+            <div className='slider-wrapper'>
               { this.state.assets.length && this.renderSlides() }
             </div>
             </Hammer>
