@@ -22,7 +22,7 @@ export default class Carousel extends Component {
   }
 
   componentWillMount(){
-    //Dummy fetch
+    //Mock fetch
     setTimeout(() => {
       this.setState({
         assets:  [{ src: 'asset0' }, { src: 'asset1' }, { src: 'asset2' }, { src: 'asset3' }, { src: 'asset4' }, { src: 'asset5' }, { src: 'assset6' }]
@@ -180,12 +180,6 @@ export default class Carousel extends Component {
       <div className="Carousel">
         <header className="Carousel-header">
           <h1 className="Carousel-title">Carousel In React</h1>
-          <div className='buttons-section'>
-            <button className='move' type='button' onClick={() => this.moveSlideX('left')}>left</button>
-            <button className='move' type='button' onClick={() => this.moveSlideX('right')}>right</button>
-            <button className='move' type='button' onClick={() => this.moveSlideX('up')}>Up</button>
-            <button className='move' type='button' onClick={() => this.moveSlideX('down')}>Down</button>
-          </div>
         </header>
             <Hammer onSwipe={this.handleSwipe}>
             <div className='slider-wrapper'>
