@@ -1,0 +1,40 @@
+{
+  "assetsByChunkName": {
+    "component---src-pages-index-js": [
+      "component---src-pages-index-js-40709e36a383c5563f36.js",
+      "component---src-pages-index-js-40709e36a383c5563f36.js.map"
+    ],
+    "path---carousel-carousel": [
+      "path---carousel-carousel-a0e39f21c11f6a62c5ab.js",
+      "path---carousel-carousel-a0e39f21c11f6a62c5ab.js.map"
+    ],
+    "path---index": [
+      "path---index-a0e39f21c11f6a62c5ab.js",
+      "path---index-a0e39f21c11f6a62c5ab.js.map"
+    ],
+    "path---app-app": [
+      "path---app-app-a0e39f21c11f6a62c5ab.js",
+      "path---app-app-a0e39f21c11f6a62c5ab.js.map"
+    ],
+    "component---src-pages-carousel-carousel-js": [
+      "component---src-pages-carousel-carousel-js-a8fdc07b8770bb6d0f2e.js",
+      "component---src-pages-carousel-carousel-js-a8fdc07b8770bb6d0f2e.js.map"
+    ],
+    "commons": [
+      "commons-f416e605ba31f86dc9a1.js",
+      "build-js-styles.css",
+      "commons-f416e605ba31f86dc9a1.js.map",
+      "build-js-styles.css.map"
+    ],
+    "app": [
+      "app-1f16376cd1e1bfaa39ee.js",
+      "build-js-styles.css",
+      "app-1f16376cd1e1bfaa39ee.js.map",
+      "build-js-styles.css.map"
+    ],
+    "component---src-pages-app-app-js": [
+      "component---src-pages-app-app-js-0c6a3c044c17bbc8ef23.js",
+      "component---src-pages-app-app-js-0c6a3c044c17bbc8ef23.js.map"
+    ]
+  }
+}
