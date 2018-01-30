@@ -5,6 +5,7 @@ import './Carousel.css';
 export default class Carousel extends Component {
   constructor(){
     super()
+    this.canMove = true
     this.moveDeg = 90
     this.state = {
       assets: [{ src: 'asset0' }, { src: 'asset1' }, { src: 'asset2' }, { src: 'asset3' }, { src: 'asset4' }, { src: 'asset5' }, { src: 'assset6' }],
@@ -28,7 +29,7 @@ export default class Carousel extends Component {
       console.log(virtualSlidesArray)
       this.setState({
         virtualSlidesArray
-      })
+      }, () => (this.canMove = true))
     })
   }
 
@@ -164,6 +165,12 @@ export default class Carousel extends Component {
   }
 
   handleSwipe = ({ offsetDirection, isFinal }) => {
+    if (!this.canMove) {
+      return false
+    }
+
+    this.canMove = false
+
     const direction = {
       2: 'left',
       4: 'right'
