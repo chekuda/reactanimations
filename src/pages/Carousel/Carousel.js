@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 import Hammer from 'react-hammerjs'
+import FadeIntransition from '../../components/FadeinTransition/FadeInTransition'
 import './Carousel.css';
 
 export default class Carousel extends Component {
   constructor(){
     super()
     this.canMove = true
+    this.transitionAdded = false
     this.moveDeg = 90
     this.state = {
-      assets: [{ src: 'asset0' }, { src: 'asset1' }, { src: 'asset2' }, { src: 'asset3' }, { src: 'asset4' }, { src: 'asset5' }, { src: 'assset6' }],
+      assets: [],
       rotateStatus: {
         rotateX: 0,
         rotateY: 0,
@@ -20,10 +22,24 @@ export default class Carousel extends Component {
   }
 
   componentWillMount(){
-    this.getVirtualSlides()
+    //Dummy fetch
+    setTimeout(() => {
+      this.setState({
+        assets:  [{ src: 'asset0' }, { src: 'asset1' }, { src: 'asset2' }, { src: 'asset3' }, { src: 'asset4' }, { src: 'asset5' }, { src: 'assset6' }]
+      },() => this.getVirtualSlides())
+    }, 3000)
   }
-  componentDidMount(){
-   this.slider.addEventListener('transitionend', this.getVirtualSlides, false)
+
+  componentWillUnmount(){
+    this.slider.removeEventListener('transitionend', this.getVirtualSlides, false)
+  }
+
+  componentDidUpdate(){
+    if(this.transitionAdded){
+      return
+    }
+    this.transitionAdded = true
+    this.slider.addEventListener('transitionend', this.getVirtualSlides, false)
   }
 
   addCubeClasses(index){
@@ -64,27 +80,16 @@ export default class Carousel extends Component {
         if(index === current) {
           return ele
         } else if(index === current - 1) {
-          return visibledSlide - 1 >= 0 ? visibledSlide - 1 : assets.length -1
-        } else if(index === current + 1){
-          return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
-        } else if(index === 0){
-          return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
-        } else if(index === virtualIndexArray.length -1){
-          return visibledSlide -1 >= 0 ? visibledSlide - 1 : assets.length -1
-        } else if(index !== current -1 || index !== current +1){
+          return visibledSlide - 1 >= 0 ? visibledSlide - 1 : assets.length - 1
+        } else if(index === current + 1) {
+          return visibledSlide + 1 <= assets.length - 1 ? visibledSlide + 1 : 0
+        } else if(index === 0) {
+          return visibledSlide + 1 <= assets.length - 1 ? visibledSlide + 1 : 0
+        } else if(index === virtualIndexArray.length - 1) {
+          return visibledSlide - 1 >= 0 ? visibledSlide - 1 : assets.length - 1
+        } else if(index !== current - 1 || index !== current + 1) {
           return ele
         }
-        // else if((current - 1 >= 0) && (index === current - 1)){
-        //   return visibledSlide - 1 >= 0 ? visibledSlide - 1 : assets.length -1
-        // } else if((current + 1 <= virtualIndexArray.length -1) && (index === current +1)){
-        //   return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
-        // } else if(current -1 < 0 && index === virtualIndexArray.length -1){
-        //   return visibledSlide -1 >= 0 ? visibledSlide - 1 : assets.length -1
-        // } else if(current + 1 > virtualIndexArray.length - 1 && index === 0){
-        //   return visibledSlide + 1 <= assets.length -1 ? visibledSlide + 1 : 0
-        // } else if(index !== current -1 || index !== current +1) {
-        //   return ele
-        // }
       })
     }
 
@@ -123,7 +128,7 @@ export default class Carousel extends Component {
 
   getRotateDeg(){
   const { rotateStatus, direction } = this.state
-  const { rotateX, rotateY, rotateZ } = rotateStatus
+  const { rotateY } = rotateStatus
 
   if(!direction) return {}
 
@@ -138,19 +143,21 @@ export default class Carousel extends Component {
     const { assets, virtualIndexArray } = this.state
 
     return (
-      <div className='slider' style={{ transform: this.getRotateDeg()}} ref={slider => this.slider = slider}>
-        {
-        virtualIndexArray.map((virtualAssetNumber, index) =>{
-          return (
-            <div
-            key={index}
-            className={`slide ${this.addCubeClasses(index)}`}>
-            { assets.find(({ src }, i) => virtualAssetNumber === i).src }
-            </div>
-          )
-        })
-        }
-      </div>
+      <FadeIntransition>
+        <div className='slider' style={{ transform: this.getRotateDeg()}} ref={slider => this.slider = slider}>
+          {
+          virtualIndexArray.map((virtualAssetNumber, index) =>{
+            return (
+              <div
+              key={index}
+              className={`slide ${this.addCubeClasses(index)}`}>
+              { assets.find(({ src }, i) => virtualAssetNumber === i).src }
+              </div>
+            )
+          })
+          }
+        </div>
+      </FadeIntransition>
     )
   }
 
@@ -182,7 +189,7 @@ export default class Carousel extends Component {
         </header>
             <Hammer onSwipe={this.handleSwipe}>
             <div className='slider-wrapper'>
-              { this.state.assets.length && this.renderSlides() }
+              { this.state.assets.length > 0 && this.renderSlides() }
             </div>
             </Hammer>
       </div>
